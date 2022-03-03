@@ -9,36 +9,46 @@ import {
   Query,
 } from '@nestjs/common';
 import { CoffeesService } from './coffees.service';
+import { CreateCoffeeDto } from './dto/create-coffee.dto';
+import { UpdateCoffeeDto } from './dto/update-coffee.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Public } from '../common/decorators/public.decorator';
+import { ParseIntPipe } from '../common/pipes/parse-int.pipe';
+import { ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('coffees')
 @Controller('coffees')
 export class CoffeesController {
-  constructor(private readonly coffeesService: CoffeesService) {
+  constructor(private readonly coffeesService: CoffeesService) {}
 
-  }
-
+  @ApiForbiddenResponse({ description: 'Forbidden.' })
   @Get()
-  findAll(@Query() paginationQuery) {
-    const { limit, offset } = paginationQuery;
-    return `This action returns all coffees. Limit ${limit}, offset: ${offset}`;
+  @Public()
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.coffeesService.findAll(paginationQuery);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return `This action returns coffee #${id}`;
+  @Public()
+  findOne(@Param('id', ParseIntPipe) id: string) {
+    return this.coffeesService.findOne(id);
   }
 
   @Post()
-  create(@Body() body) {
-    return body;
+  @Public()
+  create(@Body() createCoffeeDto: CreateCoffeeDto) {
+    return this.coffeesService.create(createCoffeeDto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body) {
-    return `This action updates #${id} coffee`;
+  @Public()
+  update(@Param('id') id: string, @Body() updateCoffeeDto: UpdateCoffeeDto) {
+    return this.coffeesService.update(id, updateCoffeeDto);
   }
 
   @Delete(':id')
+  @Public()
   remove(@Param('id') id: string) {
-    return `This action removes #${id} coffee`;
+    return this.coffeesService.remove(id);
   }
 }
